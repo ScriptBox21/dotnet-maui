@@ -1,15 +1,25 @@
 ﻿using Foundation;
 using UIKit;
 using Xamarin.Platform;
+
+#if !NET6_0
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.iOS;
+#endif
+
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Sample.iOS
 {
 	// The UIApplicationDelegate for the application. This class is responsible for launching the
 	// User Interface of the application, as well as listening (and optionally responding) to application events from iOS.
 	[Register("AppDelegate")]
+#if !NET6_0
 	public class AppDelegate : FormsApplicationDelegate, IUIApplicationDelegate
+#else
+	public class AppDelegate : UIApplicationDelegate, IUIApplicationDelegate
+#endif
 	{
 		UIWindow _window;
 
@@ -32,6 +42,21 @@ namespace Sample.iOS
 			};
 
 			_window.MakeKeyAndVisible();
+
+			// In 5 seconds, add and remove some controls so we can see that working
+			Task.Run(async () => {
+
+				await Task.Delay(5000).ConfigureAwait(false);
+
+				void addLabel()
+				{
+					(content as VerticalStackLayout).Add(new Label { Text = "I show up after 5 seconds" });
+					var first = (content as VerticalStackLayout).Children.First();
+					(content as VerticalStackLayout).Remove(first); 
+				};
+
+				_window.BeginInvokeOnMainThread(addLabel);
+			});
 
 			return true;
 		}

@@ -2,17 +2,17 @@
 using System.ComponentModel;
 using System.Linq;
 using Windows.UI.Text;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Documents;
-using Windows.UI.Xaml.Media;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
+using Microsoft.UI.Xaml.Documents;
+using Microsoft.UI.Xaml.Media;
 using Xamarin.Forms.Internals;
-using WBrush = Windows.UI.Xaml.Media.Brush;
+using WBrush = Microsoft.UI.Xaml.Media.Brush;
 
 namespace Xamarin.Forms.Platform.UWP
 {
-	public class DatePickerRenderer : ViewRenderer<DatePicker, Windows.UI.Xaml.Controls.DatePicker>, ITabStopOnDescendants
+	public class DatePickerRenderer : ViewRenderer<DatePicker, Microsoft.UI.Xaml.Controls.DatePicker>, ITabStopOnDescendants
 	{
 		WBrush _defaultBrush;
 		bool _fontApplied;
@@ -35,7 +35,7 @@ namespace Xamarin.Forms.Platform.UWP
 			{
 				if (Control == null)
 				{
-					var picker = new Windows.UI.Xaml.Controls.DatePicker();
+					var picker = new Microsoft.UI.Xaml.Controls.DatePicker();
 					SetNativeControl(picker);
 					Control.Loaded += ControlOnLoaded;
 					Control.DateChanged += OnControlDateChanged;
@@ -90,17 +90,17 @@ namespace Xamarin.Forms.Platform.UWP
 			InterceptVisualStateManager.Hook(Control.GetFirstDescendant<StackPanel>(), Control, Element);
 
 			// We also have to intercept the VSM changes on the DatePicker's button
-			var button = Control.GetDescendantsByName<Windows.UI.Xaml.Controls.Button>("FlyoutButton").FirstOrDefault();
+			var button = Control.GetDescendantsByName<Microsoft.UI.Xaml.Controls.Button>("FlyoutButton").FirstOrDefault();
 
 			if (button != null)
-				InterceptVisualStateManager.Hook(button.GetFirstDescendant<Windows.UI.Xaml.Controls.Grid>(), button, Element);
+				InterceptVisualStateManager.Hook(button.GetFirstDescendant<Microsoft.UI.Xaml.Controls.Grid>(), button, Element);
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			base.OnElementPropertyChanged(sender, e);
 
-			if (e.PropertyName == DatePicker.DateProperty.PropertyName)
+			if (e.IsOneOf(DatePicker.DateProperty, DatePicker.FormatProperty))
 				UpdateDate(Element.Date);
 			else if (e.PropertyName == DatePicker.MaximumDateProperty.PropertyName)
 				UpdateMaximumDate();
@@ -138,10 +138,92 @@ namespace Xamarin.Forms.Platform.UWP
 			}
 		}
 
+		bool CheckDateFormat()
+		{
+			return String.IsNullOrWhiteSpace(Element.Format) || Element.Format.Equals("d");
+		}
+
 		void UpdateDate(DateTime date)
 		{
 			if (Control != null)
 				Control.Date = new DateTimeOffset(new DateTime(date.Ticks, DateTimeKind.Unspecified));
+
+			UpdateDay();
+			UpdateMonth();
+			UpdateYear();
+		}
+
+		void UpdateMonth()
+		{
+			Control.MonthVisible = true;
+			if (CheckDateFormat())
+			{
+				Control.MonthFormat = "month";
+			}
+			else if (Element.Format.Equals("D"))
+			{
+				Control.MonthFormat = "month.full";
+			}
+			else
+			{
+				var month = Element.Format.Count(x => x == 'M');
+				if (month == 0)
+					Control.MonthVisible = false;
+				else if (month <= 2)
+					Control.MonthFormat = "month.numeric";
+				else if (month == 3)
+					Control.MonthFormat = "month.abbreviated";
+				else
+					Control.MonthFormat = "month.full";
+			}
+		}
+
+		void UpdateDay()
+		{
+			Control.DayVisible = true;
+			if (CheckDateFormat())
+			{
+				Control.DayFormat = "day";
+			}
+			else if (Element.Format.Equals("D"))
+			{
+				Control.DayFormat = "dayofweek.full";
+			}
+			else
+			{
+				var day = Element.Format.Count(x => x == 'd');
+				if (day == 0)
+					Control.DayVisible = false;
+				else if (day == 3)
+					Control.DayFormat = "day dayofweek.abbreviated";
+				else if (day == 4)
+					Control.DayFormat = "dayofweek.full";
+				else
+					Control.DayFormat = "day";
+			}
+		}
+
+		void UpdateYear()
+		{
+			Control.YearVisible = true;
+			if (CheckDateFormat())
+			{
+				Control.YearFormat = "year";
+			}
+			else if (Element.Format.Equals("D"))
+			{
+				Control.YearFormat = "year.full";
+			}
+			else
+			{
+				var year = Element.Format.Count(x => x == 'y');
+				if (year == 0)
+					Control.YearVisible = false;
+				else if (year <= 2)
+					Control.YearFormat = "year.abbreviated";
+				else
+					Control.YearFormat = "year.full";
+			}
 		}
 
 		void UpdateFlowDirection()

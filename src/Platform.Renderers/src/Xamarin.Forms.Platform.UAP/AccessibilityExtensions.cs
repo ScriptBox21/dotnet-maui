@@ -1,6 +1,6 @@
-﻿using Windows.UI.Xaml;
-using Windows.UI.Xaml.Automation.Peers;
-using NativeAutomationProperties = Windows.UI.Xaml.Automation.AutomationProperties;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation.Peers;
+using NativeAutomationProperties = Microsoft.UI.Xaml.Automation.AutomationProperties;
 
 namespace Xamarin.Forms.Platform.UWP
 {
@@ -123,5 +123,16 @@ namespace Xamarin.Forms.Platform.UWP
 
 		}
 
+		internal static void SetAutomationProperties(
+			this FrameworkElement frameworkElement, 
+			Element element,
+			string defaultName = null)
+		{
+			frameworkElement.SetAutomationPropertiesAutomationId(element?.AutomationId);
+			 frameworkElement.SetAutomationPropertiesName(element, defaultName);
+			frameworkElement.SetAutomationPropertiesHelpText(element);
+			frameworkElement.SetAutomationPropertiesLabeledBy(element);
+			frameworkElement.SetAutomationPropertiesAccessibilityView(element);
+		}
 	}
 }

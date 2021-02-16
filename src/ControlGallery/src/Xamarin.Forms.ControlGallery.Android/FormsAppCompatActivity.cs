@@ -8,12 +8,15 @@ using Xamarin.Forms.Controls.Issues;
 using Xamarin.Forms.Platform.Android;
 using Xamarin.Forms.Platform.Android.AppLinks;
 using Xamarin.Forms.Internals;
+using RegistrarHandlers = Xamarin.Platform.Registrar;
+using System.Threading.Tasks;
+using System.Net.Http;
 
 namespace Xamarin.Forms.ControlGallery.Android
 {
 	// This is the AppCompat version of Activity1
 
-	[Activity(Label = "Control Gallery", Icon = "@drawable/icon", Theme = "@style/MyTheme",
+	[Activity(Label = "Xamarin Forms", Icon = "@drawable/icon", Theme = "@style/MyTheme",
 		MainLauncher = true, HardwareAccelerated = true, 
 		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.UiMode)]
 	[IntentFilter(new[] { Intent.ActionView },
@@ -44,9 +47,16 @@ namespace Xamarin.Forms.ControlGallery.Android
 #else
 			Forms.SetFlags("UseLegacyRenderers");
 #endif
-			Forms.Init(this, bundle);
+			// null out the assembly on the Resource Manager
+			// so all of our tests run without using the reflection APIs
+			// At some point the Resources class types will go away so
+			// reflection will stop working
+			ResourceManager.Init(null);
 
+			Forms.Init(this, bundle);
+			FormsHandlers.InitHandlers();
 			FormsMaps.Init(this, bundle);
+
 			//FormsMaterial.Init(this, bundle);
 			AndroidAppLinks.Init(this);
 			Forms.ViewInitialized += (sender, e) => {
@@ -111,6 +121,27 @@ namespace Xamarin.Forms.ControlGallery.Android
 		{
 			base.OnResume();
 			Profile.Stop();
+		}
+
+		[Export("hasInternetAccess")]
+		public bool HasInternetAccess()
+		{
+			try
+			{
+				using (var httpClient = new HttpClient())
+				using (var httpResponse = httpClient.GetAsync(@"https://www.github.com"))
+				{
+					httpResponse.Wait();
+					if (httpResponse.Result.StatusCode == System.Net.HttpStatusCode.OK)
+						return true;
+					else
+						return false;
+				}
+			}
+			catch
+			{
+				return false;
+			}
 		}
 
 		[Export("IsPreAppCompat")]

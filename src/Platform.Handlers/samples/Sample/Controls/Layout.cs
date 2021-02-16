@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Xamarin.Forms;
+using Xamarin.Platform;
+using Xamarin.Platform.Handlers;
 using Xamarin.Platform.Layouts;
 
-namespace Xamarin.Platform
+namespace Sample
 {
-	public abstract class Layout : View, ILayout, IEnumerable<IView>
+	public abstract class Layout : View, Xamarin.Platform.ILayout, IEnumerable<IView>
 	{
 		ILayoutManager _layoutManager;
 		ILayoutManager LayoutManager => _layoutManager ??= CreateLayoutManager();
@@ -14,15 +16,7 @@ namespace Xamarin.Platform
 
 		public IReadOnlyList<IView> Children { get => _children.AsReadOnly(); }
 
-		public void Add(IView view)
-		{
-			if (view == null)
-				return;
-
-			_children.Add(view);
-
-			InvalidateMeasure();
-		}
+		public ILayoutHandler LayoutHandler => Handler as ILayoutHandler;
 
 		protected abstract ILayoutManager CreateLayoutManager();
 
@@ -37,7 +31,10 @@ namespace Xamarin.Platform
 				return DesiredSize;
 			}
 
-			DesiredSize = LayoutManager.Measure(widthConstraint, heightConstraint);
+			var sizeWithoutMargins = LayoutManager.Measure(widthConstraint, heightConstraint);
+			DesiredSize = new Size(sizeWithoutMargins.Width + Margin.HorizontalThickness,
+				sizeWithoutMargins.Height + Margin.VerticalThickness);
+
 			IsMeasureValid = true;
 			return DesiredSize;
 		}
@@ -51,10 +48,43 @@ namespace Xamarin.Platform
 
 			base.Arrange(bounds);
 
-			LayoutManager.Arrange(bounds);
+			LayoutManager.Arrange(Frame);
 			IsArrangeValid = true;
-			Handler?.SetFrame(bounds);
+			Handler?.SetFrame(Frame);
 		}
 
+		public override void InvalidateMeasure()
+		{
+			base.InvalidateMeasure();
+
+			foreach (var child in Children)
+			{
+				child.InvalidateArrange();
+			}
+		}
+
+		public void Add(IView child)
+		{
+			if (child == null)
+				return;
+
+			_children.Add(child);
+
+			InvalidateMeasure();
+
+			LayoutHandler?.Add(child);
+		}
+
+		public void Remove(IView child)
+		{
+			if (child == null)
+				return;
+
+			_children.Remove(child);
+
+			InvalidateMeasure();
+
+			LayoutHandler?.Remove(child);
+		}
 	}
 }

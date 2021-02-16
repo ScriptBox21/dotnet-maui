@@ -1,4 +1,5 @@
-﻿using Xamarin.Forms;
+﻿using System;
+using Xamarin.Forms;
 
 namespace Xamarin.Platform
 {
@@ -22,5 +23,8 @@ namespace Xamarin.Platform
 
 		double Width { get; }
 		double Height { get; }
+
+		Thickness Margin { get; }
+
 	}
 }

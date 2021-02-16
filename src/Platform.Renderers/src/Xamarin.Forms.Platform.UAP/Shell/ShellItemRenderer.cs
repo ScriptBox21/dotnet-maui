@@ -2,21 +2,21 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using Windows.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Xamarin.Forms.Internals;
-using Windows.UI.Xaml;
+using Microsoft.UI.Xaml;
 
-using UwpGrid = Windows.UI.Xaml.Controls.Grid;
-using UwpColumnDefinition = Windows.UI.Xaml.Controls.ColumnDefinition;
-using UwpRowDefinition = Windows.UI.Xaml.Controls.RowDefinition;
-using UwpGridLength = Windows.UI.Xaml.GridLength;
-using UwpGridUnitType = Windows.UI.Xaml.GridUnitType;
-using UwpDataTemplate = Windows.UI.Xaml.DataTemplate;
-using UwpThickness = Windows.UI.Xaml.Thickness;
-using UwpStyle = Windows.UI.Xaml.Style;
-using Windows.UI.Xaml.Media;
-using UwpApplication = Windows.UI.Xaml.Application;
-using UwpSolidColorBrush = Windows.UI.Xaml.Media.SolidColorBrush;
+using UwpGrid = Microsoft.UI.Xaml.Controls.Grid;
+using UwpColumnDefinition = Microsoft.UI.Xaml.Controls.ColumnDefinition;
+using UwpRowDefinition = Microsoft.UI.Xaml.Controls.RowDefinition;
+using UwpGridLength = Microsoft.UI.Xaml.GridLength;
+using UwpGridUnitType = Microsoft.UI.Xaml.GridUnitType;
+using UwpDataTemplate = Microsoft.UI.Xaml.DataTemplate;
+using UwpThickness = Microsoft.UI.Xaml.Thickness;
+using UwpStyle = Microsoft.UI.Xaml.Style;
+using Microsoft.UI.Xaml.Media;
+using UwpApplication = Microsoft.UI.Xaml.Application;
+using UwpSolidColorBrush = Microsoft.UI.Xaml.Media.SolidColorBrush;
 
 namespace Xamarin.Forms.Platform.UWP
 {
@@ -43,9 +43,9 @@ namespace Xamarin.Forms.Platform.UWP
 			_ = shellContext ?? throw new ArgumentNullException(nameof(shellContext));
 
 			ShellContext = shellContext;
-			RowDefinitions.Add(new UwpRowDefinition() { Height = new UwpGridLength(1, UwpGridUnitType.Auto) });
-			RowDefinitions.Add(new UwpRowDefinition() { Height = new UwpGridLength(1, UwpGridUnitType.Star) });
-			RowDefinitions.Add(new UwpRowDefinition() { Height = new UwpGridLength(1, UwpGridUnitType.Auto) });
+			RowDefinitions.Add(new UwpRowDefinition() { Height = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Auto) });
+			RowDefinitions.Add(new UwpRowDefinition() { Height = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Star) });
+			RowDefinitions.Add(new UwpRowDefinition() { Height = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Auto) });
 
 			_Title = new TextBlock()
 			{
@@ -54,9 +54,9 @@ namespace Xamarin.Forms.Platform.UWP
 				TextTrimming = TextTrimming.CharacterEllipsis,
 				TextWrapping = TextWrapping.NoWrap
 			};
-			_HeaderArea = new UwpGrid() { Height = 40, Padding = new UwpThickness(10, 0, 10, 0) };
-			_HeaderArea.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = new UwpGridLength(1, UwpGridUnitType.Star) });
-			_HeaderArea.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = new UwpGridLength(1, UwpGridUnitType.Auto) });
+			_HeaderArea = new UwpGrid() { Height = 40, Padding = WinUIHelpers.CreateThickness(10, 0, 10, 0) };
+			_HeaderArea.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Star) });
+			_HeaderArea.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Auto) });
 			_HeaderArea.Children.Add(_Title);
 			Children.Add(_HeaderArea);
 
@@ -128,7 +128,7 @@ namespace Xamarin.Forms.Platform.UWP
 					inset += 45;
 			}
 
-			_HeaderArea.Padding = new UwpThickness(inset, 0, 0, 0);
+			_HeaderArea.Padding = WinUIHelpers.CreateThickness(inset, 0, 0, 0);
 		}
 
 		void UpdateBottomBar()
@@ -175,7 +175,7 @@ namespace Xamarin.Forms.Platform.UWP
 					}
 
 					btn.Click += (s, e) => OnShellSectionClicked(section);
-					_BottomBar.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = new UwpGridLength(1, UwpGridUnitType.Star) });
+					_BottomBar.ColumnDefinitions.Add(new UwpColumnDefinition() { Width = WinUIHelpers.CreateGridLength(1, UwpGridUnitType.Star) });
 					SetColumn(btn, i);
 					_BottomBar.Children.Add(btn);
 				}
@@ -308,23 +308,18 @@ namespace Xamarin.Forms.Platform.UWP
 
 		protected virtual void OnShellSectionChanged(ShellSection oldSection, ShellSection newSection)
 		{
-			SwitchSection(ShellNavigationSource.ShellSectionChanged, newSection, null, oldSection != null);
+			if (newSection == null)
+				throw new InvalidOperationException($"Content not found for active {ShellItem} - {ShellItem.Title}.");
+
+			if (newSection.CurrentItem == null)
+				throw new InvalidOperationException($"Content not found for active {newSection} - {newSection.Title}.");
+
+			SectionRenderer.NavigateToShellSection(newSection);
 		}
 
 		void OnShellStructureChanged(object sender, EventArgs e)
 		{
 			UpdateBottomBarVisibility();
-		}
-
-		void SwitchSection(ShellNavigationSource source, ShellSection section, Page page, bool animate = true)
-		{
-			if (section == null)
-				throw new InvalidOperationException($"Content not found for active {ShellItem} - {ShellItem.Title}.");
-
-			if (section.CurrentItem == null)
-				throw new InvalidOperationException($"Content not found for active {section} - {section.Title}.");
-
-			SectionRenderer.NavigateToShellSection(source, section, page, animate);
 		}
 
 		Page DisplayedPage { get; set; }
@@ -393,7 +388,7 @@ namespace Xamarin.Forms.Platform.UWP
 
 		void OnNavigationRequested(object sender, NavigationRequestedEventArgs e)
 		{
-			SwitchSection((ShellNavigationSource)e.RequestType, (ShellSection)sender, e.Page, e.Animated);
+			SectionRenderer.NavigateToContent(e, (ShellSection)sender);
 		}
 
 		void IFlyoutBehaviorObserver.OnFlyoutBehaviorChanged(FlyoutBehavior behavior)

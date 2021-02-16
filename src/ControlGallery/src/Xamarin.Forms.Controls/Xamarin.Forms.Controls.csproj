@@ -27,15 +27,16 @@
     <None Remove="Fonts\fa-regular-400.ttf" />
     <None Remove="Fonts\PTM55FT.ttf" />
   </ItemGroup>
-  <ItemGroup Condition="$(FromSource) == 'false'">
-    <ProjectReference Include="..\Xamarin.Forms.CustomAttributes\Xamarin.Forms.CustomAttributes.csproj" />
+  <ItemGroup>
+    <EmbeddedResource Remove="GalleryPages\DateTimePickerGalleries\DatesPage.xaml" />
+    <EmbeddedResource Remove="GalleryPages\DateTimePickerGalleries\MainTabbedPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BuildNumber.txt" />
     <EmbeddedResource Include="GalleryPages\crimson.jpg" />
     <EmbeddedResource Include="coffee.png" />
     <PackageReference Include="System.Threading.Thread" Version="4.3.0" />
-    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="NUnit" Version="3.13.1" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Xam.Plugin.DeviceInfo" Version="3.0.2" />
     <EmbeddedResource Include="Fonts\CuteFont-Regular.ttf">
@@ -56,6 +57,12 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Update="GalleryPages\CollectionViewGalleries\DataTemplateSelectorGalleries\VariedSizeDataTemplateSelectorGallery.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="GalleryPages\CollectionViewGalleries\ItemSizeGalleries\ChatExample.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="GalleryPages\DragAndDropGalleries\DragAndDropBetweenLayouts.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
@@ -74,6 +81,9 @@
     <EmbeddedResource Update="GalleryPages\RadioButtonGalleries\RadioButtonGroupGalleryPage.xaml">
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
     </EmbeddedResource>
+    <Compile Update="GalleryPages\CollectionViewGalleries\ItemSizeGalleries\ChatExample.xaml.cs">
+      <DependentUpon>ChatExample.xaml</DependentUpon>
+    </Compile>
     <Compile Update="GalleryPages\RadioButtonGalleries\RadioButtonGroupGallery.xaml.cs">
       <DependentUpon>RadioButtonGroupGallery.xaml</DependentUpon>
     </Compile>
@@ -82,6 +92,9 @@
     </Compile>
     <Compile Update="GalleryPages\IndicatorViewGalleries\IndicatorGalleries.cs">
       <SubType></SubType>
+    </Compile>
+    <Compile Update="XamStore\Controls\FlyoutFooter.xaml.cs">
+      <DependentUpon>FlyoutFooter.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -106,13 +119,20 @@
     <Folder Include="Fonts\" />
     <Folder Include="GalleryPages\AppThemeGalleries\" />
   </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup Condition="$(FromSource) == 'false'">
+    <ProjectReference Include="..\..\..\Forms\test\Xamarin.Forms.CustomAttributes\Xamarin.Forms.CustomAttributes.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(FromSource) != 'false'">
     <ProjectReference Include="..\..\..\Controls\Maps\src\Xamarin.Forms.Maps\Xamarin.Forms.Maps.csproj" />
     <ProjectReference Include="..\..\..\Forms\src\Xamarin.Forms.Core\Xamarin.Forms.Core.csproj" />
     <ProjectReference Include="..\..\..\Forms\src\Xamarin.Forms.Xaml\Xamarin.Forms.Xaml.csproj" />
-    <ProjectReference Include="..\..\..\Forms\test\Xamarin.Forms.CustomAttributes\Xamarin.Forms.CustomAttributes.csproj" />
     <ProjectReference Include="..\..\..\Platform.Handlers\src\Xamarin.Platform.Handlers\Xamarin.Platform.Handlers.csproj" />
+    <ProjectReference Include="..\..\..\Forms\test\Xamarin.Forms.CustomAttributes\Xamarin.Forms.CustomAttributes.csproj" />
+    <ProjectReference Condition=" '$(Platform)' == 'AnyCPU'" Include="..\..\..\Forms\src\Xamarin.Forms.Build.Tasks\Xamarin.Forms.Build.Tasks.csproj" >
+      <Name>Xamarin.Forms.Build.Tasks</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <Folder Include="GalleryPages\DateTimePickerGalleries\" />
   </ItemGroup>
 
   <ItemGroup>

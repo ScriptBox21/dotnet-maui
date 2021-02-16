@@ -82,7 +82,10 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			if (result == null)
+			{
+				AnimationFinished?.Invoke(this, EventArgs.Empty);
 				return result;
+			}
 
 			// we only want to use a hardware layer for the entering view because its quite likely
 			// the view exiting is animating a button press of some sort. This means lots of GPU
@@ -111,7 +114,7 @@ namespace Xamarin.Forms.Platform.Android
 				_page = ((IShellContentController)_shellContent).GetOrCreateContent();
 			}
 
-			_root = inflater.Inflate(Resource.Layout.ShellContent, null).JavaCast<CoordinatorLayout>();
+			_root = inflater.Inflate(Resource.Layout.shellcontent, null).JavaCast<CoordinatorLayout>();
 
 			_toolbar = _root.FindViewById<Toolbar>(Resource.Id.shellcontent_toolbar);
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Imaging;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 using IOPath = System.IO.Path;
 
@@ -10,9 +10,9 @@ namespace Xamarin.Forms.Platform.UWP
 {
 	public sealed class FileImageSourceHandler : IImageSourceHandler, IIconElementHandler
 	{
-		public Task<Windows.UI.Xaml.Media.ImageSource> LoadImageAsync(ImageSource imagesource, CancellationToken cancellationToken = new CancellationToken())
+		public Task<Microsoft.UI.Xaml.Media.ImageSource> LoadImageAsync(ImageSource imagesource, CancellationToken cancellationToken = new CancellationToken())
 		{
-			Windows.UI.Xaml.Media.ImageSource image = null;
+			Microsoft.UI.Xaml.Media.ImageSource image = null;
 			if (imagesource is FileImageSource filesource)
 			{
 				UpdateImageDirectory(filesource);
@@ -56,7 +56,12 @@ namespace Xamarin.Forms.Platform.UWP
 			if (fileSource == null || fileSource.File == null)
 				return;
 
-			var imageDirectory = Application.Current.OnThisPlatform().GetImageDirectory();
+			var currentApp = Application.Current;
+
+			if (currentApp == null)
+				return;
+
+			var imageDirectory = currentApp.OnThisPlatform().GetImageDirectory();
 
 			if (!string.IsNullOrEmpty(imageDirectory))
 			{
