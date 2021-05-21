@@ -1,7 +1,8 @@
-﻿using AppKit;
+using AppKit;
 using CoreGraphics;
 using Foundation;
-using Xamarin.Forms;
+using Microsoft.Maui;
+using Microsoft.Maui.Controls;
 using Xamarin.Forms.Platform.MacOS;
 
 namespace Samples.Mac
@@ -23,7 +24,7 @@ namespace Samples.Mac
 
             window = new NSWindow(rect, style, NSBackingStore.Buffered, false)
             {
-                Title = "Xamarin.Essentials",
+                Title = "Microsoft.Maui.Essentials",
                 TitleVisibility = NSWindowTitleVisibility.Hidden,
             };
         }

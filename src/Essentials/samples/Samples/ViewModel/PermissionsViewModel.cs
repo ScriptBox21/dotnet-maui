@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
+using Microsoft.Maui.Essentials;
 using Samples.Model;
-using Xamarin.Essentials;
 
 namespace Samples.ViewModel
 {
