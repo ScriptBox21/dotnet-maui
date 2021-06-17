@@ -65,8 +65,10 @@ using Windows.System;
 			handler.NativeView?.UpdateReturnType(entry);
 		}
 
-		[MissingMapper]
-		public static void MapClearButtonVisibility(IViewHandler handler, IEntry entry) { }
+		public static void MapClearButtonVisibility(EntryHandler handler, IEntry entry)
+		{
+			handler.NativeView?.UpdateClearButtonVisibility(entry);
+		}
 
 		public static void MapCharacterSpacing(EntryHandler handler, IEntry entry)
 		{
@@ -83,7 +85,7 @@ using Windows.System;
 
 			if (VirtualView?.ReturnType == ReturnType.Next)
 			{
-				FocusManager.TryMoveFocus(FocusNavigationDirection.Next);
+				NativeView?.TryMoveFocus(FocusNavigationDirection.Next);
 			}
 			else
 			{
