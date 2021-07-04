@@ -25,6 +25,7 @@ namespace Microsoft.Maui
 			Services = host.Services;
 
 			Current.Services?.InvokeLifecycleEvents<iOSLifecycle.WillFinishLaunching>(del => del(application, launchOptions));
+
 			return true;
 		}
 
@@ -32,22 +33,31 @@ namespace Microsoft.Maui
 		{
 			Application = Services.GetRequiredService<IApplication>();
 
-			UIWindow uIWindow = new UIWindow();
-			var mauiContext = new MauiContext(Services, uIWindow);
+			var uiWindow = CreateNativeWindow();
 
-			var activationState = new ActivationState(mauiContext);
-			var window = Application.CreateWindow(activationState);
-
-			var page = window.View;
-
-			uIWindow.RootViewController = window.View.ToUIViewController(mauiContext);
-			Window = uIWindow;
+			Window = uiWindow;
 
 			Window.MakeKeyAndVisible();
 
 			Current.Services?.InvokeLifecycleEvents<iOSLifecycle.FinishedLaunching>(del => del(application, launchOptions));
 
 			return true;
+		}
+
+		UIWindow CreateNativeWindow()
+		{
+			var uiWindow = new UIWindow();
+
+			var mauiContext = new MauiContext(Services, uiWindow);
+
+			Services.InvokeLifecycleEvents<iOSLifecycle.OnMauiContextCreated>(del => del(mauiContext));
+
+			var activationState = new ActivationState(mauiContext);
+			var window = Application.CreateWindow(activationState);
+
+			uiWindow.SetWindow(window, mauiContext);
+
+			return uiWindow;
 		}
 
 		public override void PerformActionForShortcutItem(UIApplication application, UIApplicationShortcutItem shortcutItem, UIOperationHandler completionHandler)
